@@ -41,13 +41,14 @@ public:
   bool open();
 
   /**
-   * @brief Set the ip object
+   * @brief Set the net addr object
    *
-   * @param ip
+   * @param addr
+   * @param mask
    * @return true
    * @return false
    */
-  bool set_ip(const std::string& ip);
+  bool config(const std::string& addr, const std::string& mask);
 
   /**
    * @brief

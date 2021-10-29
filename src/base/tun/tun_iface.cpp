@@ -2,6 +2,7 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <iostream>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -14,12 +15,12 @@
 #include <net/if.h>
 #include <net/if_utun.h>
 /* TUNSETIFF ifr flags */
-#define TUNSETIFF       _IOW('T', 202, int) 
-#define IFF_TUN         0x0001
-#define IFF_TAP         0x0002
-#define IFF_NAPI        0x0010
-#define IFF_NAPI_FRAGS  0x0020
-#define IFF_NO_PI       0x1000
+#define TUNSETIFF _IOW('T', 202, int)
+#define IFF_TUN 0x0001
+#define IFF_TAP 0x0002
+#define IFF_NAPI 0x0010
+#define IFF_NAPI_FRAGS 0x0020
+#define IFF_NO_PI 0x1000
 #else
 #error "Unsupported platform"
 #endif
@@ -65,11 +66,11 @@ bool tun_iface::open() {
   name_ = req.ifr_name;
 
   // return
-  logi() << "TUN device opened:" << name_;
+  logi() << "tun device opened: " << name_;
   return true;
 }
 
-bool tun_iface::set_ip(const std::string& ip) {
+bool tun_iface::config(const std::string& addr, const std::string& mask) {
   // open a socket to help to set ip address for tun device
   int sock = ::socket(AF_INET, SOCK_DGRAM, 0);
   if (sock < 0) {
@@ -82,16 +83,30 @@ bool tun_iface::set_ip(const std::string& ip) {
   bzero(&req, sizeof(req));
   memcpy(&req.ifr_name, name_.data(), name_.length());
 
-  // build ip address and fill the request
-  struct sockaddr_in sock_addr;
-  bzero(&sock_addr, sizeof(sock_addr));
-  sock_addr.sin_family = AF_INET;
-  sock_addr.sin_addr.s_addr = inet_addr(ip.c_str());
-  memcpy(&req.ifr_addr, &sock_addr, sizeof(sock_addr));
+  // build net address and fill the request
+  struct sockaddr_in net_addr;
+  bzero(&net_addr, sizeof(net_addr));
+  net_addr.sin_family = AF_INET;
+  net_addr.sin_addr.s_addr = inet_addr(addr.c_str());
+  memcpy(&req.ifr_addr, &net_addr, sizeof(net_addr));
 
   // send the tun device request
   if (::ioctl(sock, SIOCSIFADDR, &req) < 0) {
     loge() << "failed to set SIOCSIFADDR:" << strerror(errno);
+    ::close(sock);
+    return false;
+  }
+
+  // build net mask and fill the request
+  struct sockaddr_in net_mask;
+  bzero(&net_mask, sizeof(net_mask));
+  net_mask.sin_family = AF_INET;
+  net_mask.sin_addr.s_addr = inet_addr(mask.c_str());
+  memcpy(&req.ifr_netmask, &net_mask, sizeof(net_mask));
+
+  // send the tun device request
+  if (::ioctl(sock, SIOCSIFNETMASK, &req) < 0) {
+    loge() << "failed to set SIOCSIFNETMASK:" << strerror(errno);
     ::close(sock);
     return false;
   }
@@ -109,8 +124,12 @@ bool tun_iface::set_ip(const std::string& ip) {
   // close the helper socket
   ::close(sock);
 
-  // return
-  logi() << "TUN device was bound to ip:" << ip;
+  // clang-format off
+  logi() << "tun device: " << name_ << " configured done:\n"
+    << "  net addr: " << addr << "\n"
+    << "  net mask: " << mask;
+  // clang-format on
+
   return true;
 }
 

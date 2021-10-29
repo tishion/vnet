@@ -37,7 +37,7 @@ int application::run(const std::string& tun_ip, const std::string& remote_ip,
     return -1;
   }
 
-  if (!tun_iface.set_ip(tun_ip)) {
+  if (!tun_iface.config(tun_ip, "255.255.255.0")) {
     loge() << "failed to set ip for tun device";
     return -1;
   }
