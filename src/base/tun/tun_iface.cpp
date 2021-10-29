@@ -7,8 +7,22 @@
 #include <unistd.h>
 
 #include <arpa/inet.h>
+#if __linux__
 #include <linux/if.h>
 #include <linux/if_tun.h>
+#elif __APPLE__
+#include <net/if.h>
+#include <net/if_utun.h>
+/* TUNSETIFF ifr flags */
+#define TUNSETIFF       _IOW('T', 202, int) 
+#define IFF_TUN         0x0001
+#define IFF_TAP         0x0002
+#define IFF_NAPI        0x0010
+#define IFF_NAPI_FRAGS  0x0020
+#define IFF_NO_PI       0x1000
+#else
+#error "Unsupported platform"
+#endif
 #include <sys/ioctl.h>
 
 #include "common/log.hpp"

@@ -23,7 +23,7 @@ public:
   int wait();
 
 protected:
-  void forward_data(int in_fd, int out_fd, unsigned int out_flags);
+  void forward_data(int in_fd, int out_fd);
   void forward_tun_to_socket();
   void forward_socket_to_tun();
 

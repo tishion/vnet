@@ -1,6 +1,7 @@
-#include <arpa/inet.h>
+#include <signal.h>
 #include <string.h>
-#include <sys/signal.h>
+
+#include <arpa/inet.h>
 
 #include "common/log.hpp"
 

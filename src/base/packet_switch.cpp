@@ -46,7 +46,7 @@ int packet_switch::wait() {
   return 0;
 }
 
-void packet_switch::forward_data(int in_fd, int out_fd, unsigned int out_flags) {
+void packet_switch::forward_data(int in_fd, int out_fd) {
 
 #if defined(ZERO_COPY_TRANSFER)
   int fd_pipe[2];
@@ -54,14 +54,14 @@ void packet_switch::forward_data(int in_fd, int out_fd, unsigned int out_flags) 
 
   while (true) {
     // move data from in fd to pipe
-    rc = splice(in_fd, nullptr, fd_pipe[1], nullptr, 4096, 0);
+    rc = splice(in_fd, nullptr, fd_pipe[1], nullptr, 4096, SPLICE_F_MOVE | SPLICE_F_MOVE);
     if (rc <= 0) {
       loge() << "failed to move data from in fd to pipe:" << strerror(errno);
       break;
     }
 
     // move data from pipe to out fd
-    rc = splice(fd_pipe[0], nullptr, out_fd, nullptr, rc, out_flags);
+    rc = splice(fd_pipe[0], nullptr, out_fd, nullptr, rc, SPLICE_F_MOVE | SPLICE_F_MOVE);
     if (rc <= 0) {
       loge() << "failed to move data to pipe to out fd" << strerror(errno);
       break;
@@ -97,10 +97,10 @@ void packet_switch::forward_data(int in_fd, int out_fd, unsigned int out_flags) 
 }
 
 void packet_switch::forward_tun_to_socket() {
-  forward_data(fd_tun_, fd_socket_, SPLICE_F_MOVE | SPLICE_F_MOVE);
+  forward_data(fd_tun_, fd_socket_);
 }
 
 void packet_switch::forward_socket_to_tun() {
-  forward_data(fd_socket_, fd_tun_, SPLICE_F_MOVE);
+  forward_data(fd_socket_, fd_tun_);
 }
 } // namespace vnet
