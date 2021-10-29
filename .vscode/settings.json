@@ -1,0 +1,20 @@
+{
+  "files.associations": {
+    "ostream": "cpp",
+    "if_tunnel.h": "c",
+    "ip.h": "c",
+    "unistd.h": "c",
+    "fcntl.h": "c",
+    "stdio.h": "c",
+    "inet.h": "c",
+    "atomic": "cpp",
+    "*.tcc": "cpp",
+    "fstream": "cpp",
+    "sstream": "cpp",
+    "cstdint": "cpp"
+  },
+  "cmake.buildDirectory": "${workspaceFolder}/build/linux",
+  "C_Cpp.default.includePath": [
+    "${workspaceFolder}/src"
+  ]
+}
