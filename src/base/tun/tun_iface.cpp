@@ -66,11 +66,7 @@ bool tun_iface::open() {
   name_ = req.ifr_name;
 
   // return
-<<<<<<< HEAD
   logi() << "tun device " << name_ << " opened successfully";
-=======
-  logi() << "tun device opened: " << name_;
->>>>>>> 07b520e14d477b27b56a928072a639902fa1a4e7
   return true;
 }
 
