@@ -41,9 +41,10 @@ public:
   bool open();
 
   /**
-   * @brief Set the ip object
+   * @brief Set the net addr object
    *
-   * @param ip
+   * @param addr
+   * @param mask
    * @return true
    * @return false
    */

@@ -12,7 +12,7 @@ class application {
 private:
 public:
   application();
-  ~application();
+  ~application(); 
 
   int run(const std::string& tun_ip, const std::string& remote_ip, uint16_t remote_port);
 
