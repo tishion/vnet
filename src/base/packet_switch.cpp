@@ -84,12 +84,14 @@ void packet_switch::forward_data(int in_fd, int out_fd) {
   int left = 0;
   std::vector<uint8_t> buf(4096);
   while (true) {
+    // read data from source
     rlen = ::read(in_fd, buf.data(), buf.size());
     if (rlen < 0) {
       loge() << "failed to read data from in fd:" << strerror(errno);
       break;
     }
 
+    // write all source data to destination
     left = rlen;
     while (left) {
       wlen = ::write(out_fd, buf.data(), left);
