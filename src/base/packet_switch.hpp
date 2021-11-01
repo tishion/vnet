@@ -19,8 +19,8 @@ public:
   ~packet_switch();
 
   bool start(int tun, int socket);
-  void stop();
   int wait();
+  void stop();
 
 protected:
   void forward_data(int in_fd, int out_fd);
@@ -28,14 +28,13 @@ protected:
   void forward_socket_to_tun();
 
 private:
+  int wakeup_fd_;
+
   int fd_tun_;
   int fd_socket_;
 
   std::unique_ptr<std::thread> tun_to_socket_worker_;
   std::unique_ptr<std::thread> socket_to_tun_worker_;
-
-  std::mutex mtx_;
-  std::condition_variable stop_;
 };
 } // namespace vnet
 

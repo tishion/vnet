@@ -14,19 +14,21 @@
 vnet::application app_;
 
 static void sigexit(int signo) {
+  logi() << "exit action received...";
   app_.stop();
 }
 
 static void set_signal(int signo, void (*handler)(int)) {
   struct sigaction sa;
-
-  memset(&sa, 0, sizeof(sa));
+  bzero(&sa, sizeof(sa));
 
   sa.sa_handler = (void (*)(int))handler;
-#ifdef SA_INTERRUPT
-  sa.sa_flags = SA_INTERRUPT;
-#endif
-  sigaction(signo, &sa, NULL);
+  // #ifdef SA_INTERRUPT
+  //   sa.sa_flags = SA_INTERRUPT;
+  // #endif
+  if (sigaction(signo, &sa, nullptr) < 0) {
+    loge() << "failed to set signal handler";
+  }
 }
 
 static void usage(const char* program) {

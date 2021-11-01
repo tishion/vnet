@@ -74,6 +74,10 @@ bool udp_socket::connect(const std::string& ip, uint16_t port) {
   return true;
 }
 
+void udp_socket::shutdown() {
+  ::shutdown(sock_fd_, SHUT_RDWR);
+}
+
 void udp_socket::close() {
   // close the socket
   if (sock_fd_ >= 0) {

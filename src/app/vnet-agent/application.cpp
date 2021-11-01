@@ -2,9 +2,6 @@
 
 #include "common/log.hpp"
 
-#include "base/tun/tun_iface.hpp"
-#include "base/udp/udp_socket.hpp"
-
 namespace vnet {
 
 application::application() {
@@ -15,47 +12,46 @@ application::~application() {
 
 int application::run(const std::string& tun_ip, const std::string& remote_ip,
                      uint16_t remote_port) {
-  udp_socket udp_socket;
-  if (!udp_socket.open()) {
+  if (!udp_socket_.open()) {
     loge() << "failed to create socket for lower connection";
     return -1;
   }
 
-  if (!udp_socket.bind("0.0.0.0", 8888)) {
+  if (!udp_socket_.bind("0.0.0.0", 8888)) {
     loge() << "failed to bind connection socket to local address";
     return -1;
   }
 
-  if (!udp_socket.connect(remote_ip, remote_port)) {
+  if (!udp_socket_.connect(remote_ip, remote_port)) {
     loge() << "failed to connect to remote peer";
     return -1;
   }
 
-  tun_iface tun_iface;
-  if (!tun_iface.open()) {
+  if (!tun_iface_.open()) {
     loge() << "failed to open tun device";
     return -1;
   }
 
-  if (!tun_iface.config(tun_ip, "255.255.255.0")) {
+  if (!tun_iface_.config(tun_ip, "255.255.255.0")) {
     loge() << "failed to configure tun device";
     return -1;
   }
 
   // start packet switch
-  packet_switch_.start(tun_iface.fd(), udp_socket.fd());
+  packet_switch_.start(tun_iface_.fd(), udp_socket_.fd());
   int rc = packet_switch_.wait();
 
   // close tun device
-  tun_iface.close();
+  tun_iface_.close();
 
   // close lower socket
-  udp_socket.close();
+  udp_socket_.close();
 
   // return error code
   return rc;
 }
 
 void application::stop() {
+  packet_switch_.stop();
 }
 } // namespace vnet

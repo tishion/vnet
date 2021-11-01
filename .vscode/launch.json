@@ -10,7 +10,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/out/bin/vnet-agent",
-            "args": ["172.16.0.1", "10.12.180.37", "8888"],
+            "args": ["10.0.0.100", "172.16.203.1", "8888"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

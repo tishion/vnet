@@ -64,6 +64,12 @@ public:
    * @brief
    *
    */
+  void shutdown();
+
+  /**
+   * @brief
+   *
+   */
   void close();
 
 private:
