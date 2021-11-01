@@ -101,7 +101,7 @@ logger& logger::default_instance() {
 }
 
 logger::logger()
-    : level_(LS_DEBUG) {
+    : level_(LS_VERBOSE) {
 }
 
 logger::~logger() {

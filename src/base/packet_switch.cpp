@@ -18,14 +18,20 @@ namespace vnet {
 packet_switch::packet_switch()
     : fd_tun_(-1)
     , fd_socket_(-1) {
-  wakeup_fd_ = eventfd(0, 0);
-  if (wakeup_fd_ <= 0) {
-    loge() << "failed to create wakeup event";
+  wakeup_tun_fd_ = eventfd(0, 0);
+  if (wakeup_tun_fd_ <= 0) {
+    loge() << "failed to create wake up tun event";
+  }
+
+  wakeup_udp_fd_ = eventfd(0, 0);
+  if (wakeup_udp_fd_ <= 0) {
+    loge() << "failed to create wake up udp event";
   }
 }
 
 packet_switch::~packet_switch() {
-  ::close(wakeup_fd_);
+  ::close(wakeup_tun_fd_);
+  ::close(wakeup_udp_fd_);
 }
 
 bool packet_switch::start(int tun, int socket) {
@@ -53,11 +59,17 @@ int packet_switch::wait() {
 }
 
 void packet_switch::stop() {
-  uint64_t n = 0;
-  write(wakeup_fd_, &n, sizeof(uint64_t));
+  logi() << "send wake up signal...";
+  uint64_t n = 1;
+  if (write(wakeup_udp_fd_, &n, sizeof(uint64_t)) <= 0) {
+    loge() << "failed to send wake up udp signal";
+  }
+  if (write(wakeup_tun_fd_, &n, sizeof(uint64_t)) <= 0) {
+    loge() << "failed to send wake up tun signal";
+  }
 }
 
-void packet_switch::forward_data(int in_fd, int out_fd) {
+void packet_switch::forward_data(int in_fd, int out_fd, int wakeup_fd) {
 // currently the linux kernel build-in tun driver doesn't support
 // splice operation, so we cannot leverage the zero copy technology
 // for better performance to redirect the data, refer to :
@@ -98,47 +110,52 @@ void packet_switch::forward_data(int in_fd, int out_fd) {
 
   // buf
   std::vector<uint8_t> buf(4096);
-
-  // fd set
-  fd_set fds;
-  FD_ZERO(&fds);
-  FD_SET(wakeup_fd_, &fds);
-  FD_SET(in_fd, &fds);
   while (true) {
+    // prepare fd set
     fd_set read_fds;
-    memcpy(&read_fds, &fds, sizeof(fds));
+    FD_ZERO(&read_fds);
+    FD_SET(wakeup_fd, &read_fds);
+    FD_SET(in_fd, &read_fds);
+
     // read data from sourceread_set
-    ret = select(in_fd + 1, &read_fds, nullptr, nullptr, nullptr);
+    ret = select(FD_SETSIZE, &read_fds, nullptr, nullptr, nullptr);
     if (ret < 0) {
       loge() << "failed to select in fd:" << strerror(errno);
       return;
     }
 
     // check and reset wakeup event
-    if (FD_ISSET(wakeup_fd_, &read_fds)) {
+    if (FD_ISSET(wakeup_fd, &read_fds)) {
+      logv() << "wake up signal fired";
       // read eventfd to reset the status
       uint64_t n;
-      read(wakeup_fd_, &n, sizeof(uint64_t));
+      read(wakeup_fd, &n, sizeof(uint64_t));
       logi() << "wake up event fired, exit worker";
       return;
     }
 
-    // read data
-    rlen = ::read(in_fd, buf.data(), buf.size());
-    if (rlen <= 0) {
-      loge() << "failed to read data from in fd:" << strerror(errno);
-      return;
-    }
-
-    // write all source data to destination
-    left = rlen;
-    while (left) {
-      wlen = ::write(out_fd, buf.data(), left);
-      if (wlen <= 0) {
-        loge() << "failed to write data to out fd:" << strerror(errno);
+    if (FD_ISSET(in_fd, &read_fds)) {
+      // read data
+      rlen = ::read(in_fd, buf.data(), buf.size());
+      if (rlen <= 0) {
+        loge() << "failed to read data from in fd:" << strerror(errno);
         return;
       }
-      left -= wlen;
+
+      logv() << "<<<< read " << rlen << " bytes from in fd";
+
+      // write all source data to destination
+      left = rlen;
+      while (left) {
+        wlen = ::write(out_fd, buf.data(), left);
+        if (wlen <= 0) {
+          loge() << "failed to write data to out fd:" << strerror(errno);
+          return;
+        }
+        logv() << ">>>> write " << wlen << " bytes to out fd";
+
+        left -= wlen;
+      }
     }
   }
 #endif
@@ -146,13 +163,13 @@ void packet_switch::forward_data(int in_fd, int out_fd) {
 
 void packet_switch::forward_tun_to_socket() {
   logi() << "tun -> socket worker is running...";
-  forward_data(fd_tun_, fd_socket_);
+  forward_data(fd_tun_, fd_socket_, wakeup_tun_fd_);
   logi() << "tun -> socket worker is exiting...";
 }
 
 void packet_switch::forward_socket_to_tun() {
   logi() << "socket -> tun worker is running...";
-  forward_data(fd_socket_, fd_tun_);
+  forward_data(fd_socket_, fd_tun_, wakeup_udp_fd_);
   logi() << "socket -> tun worker is exiting...";
 }
 } // namespace vnet

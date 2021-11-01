@@ -23,12 +23,13 @@ public:
   void stop();
 
 protected:
-  void forward_data(int in_fd, int out_fd);
+  void forward_data(int in_fd, int out_fd, int wakeup_fd);
   void forward_tun_to_socket();
   void forward_socket_to_tun();
 
 private:
-  int wakeup_fd_;
+  int wakeup_tun_fd_;
+  int wakeup_udp_fd_;
 
   int fd_tun_;
   int fd_socket_;
