@@ -48,6 +48,13 @@ int packet_switch::wait() {
 
 void packet_switch::forward_data(int in_fd, int out_fd) {
 
+// currently the linux kernel build-in tun driver doesn't support
+// splice operation, so we cannot leverage the zero copy technology
+// for better performance to redirect the data, refer to :
+// https://github.com/torvalds/linux/blob/master/drivers/net/tun.c
+// https://core.ac.uk/download/pdf/44404755.pdf
+// if performace is critically required then we need to implement
+// a custom tun device dirver.
 #if defined(ZERO_COPY_TRANSFER)
   int fd_pipe[2];
   int rc = pipe(fd_pipe);
