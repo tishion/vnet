@@ -7,6 +7,9 @@
 #include <mutex>
 #include <thread>
 
+#include "packet_switch_epoll.hpp"
+#include "packet_switch_select.hpp"
+
 namespace vnet {
 
 /**
@@ -22,20 +25,8 @@ public:
   int wait();
   void stop();
 
-protected:
-  void forward_data(int in_fd, int out_fd, int wakeup_fd);
-  void forward_tun_to_socket();
-  void forward_socket_to_tun();
-
 private:
-  int wakeup_tun_fd_;
-  int wakeup_udp_fd_;
-
-  int fd_tun_;
-  int fd_socket_;
-
-  std::unique_ptr<std::thread> tun_to_socket_worker_;
-  std::unique_ptr<std::thread> socket_to_tun_worker_;
+  packet_switch_select switch_;
 };
 } // namespace vnet
 

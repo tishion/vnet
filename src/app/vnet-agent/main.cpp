@@ -5,10 +5,6 @@
 
 #include "common/log.hpp"
 
-#include "base/packet_switch.hpp"
-#include "base/tun/tun_iface.hpp"
-#include "base/udp/udp_socket.hpp"
-
 #include "application.hpp"
 
 vnet::application app_;

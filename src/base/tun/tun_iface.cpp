@@ -43,7 +43,13 @@ int tun_iface::fd() {
 
 bool tun_iface::open() {
   // open the tun device
+#if defined(__linux__)
   int fd = ::open("/dev/net/tun", O_RDWR);
+#elif defined(__APPLE__)
+  int fd = ::open("/dev/tun12", O_RDWR);
+#else
+#error "unsupported platform"
+#endif
   if (fd <= 0) {
     loge() << "failed to open tun device:" << strerror(errno);
     return false;

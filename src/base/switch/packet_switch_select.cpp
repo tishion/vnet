@@ -1,4 +1,4 @@
-#include "packet_switch.hpp"
+#include "packet_switch_select.hpp"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -12,10 +12,11 @@
 #include <vector>
 
 #include "common/log.hpp"
+#include "common/utils.h"
 
 namespace vnet {
 
-packet_switch::packet_switch()
+packet_switch_select::packet_switch_select()
     : fd_tun_(-1)
     , fd_socket_(-1) {
   wakeup_tun_fd_ = eventfd(0, 0);
@@ -29,25 +30,25 @@ packet_switch::packet_switch()
   }
 }
 
-packet_switch::~packet_switch() {
+packet_switch_select::~packet_switch_select() {
   ::close(wakeup_tun_fd_);
   ::close(wakeup_udp_fd_);
 }
 
-bool packet_switch::start(int tun, int socket) {
+bool packet_switch_select::start(int tun, int socket) {
   fd_tun_ = tun;
   fd_socket_ = socket;
 
-  socket_to_tun_worker_ =
-      std::make_unique<std::thread>(&packet_switch::forward_socket_to_tun, this);
+  socket_to_tun_worker_ = std::unique_ptr<std::thread>(
+      new std::thread(&packet_switch_select::forward_socket_to_tun, this));
 
-  tun_to_socket_worker_ =
-      std::make_unique<std::thread>(&packet_switch::forward_tun_to_socket, this);
+  tun_to_socket_worker_ = std::unique_ptr<std::thread>(
+      new std::thread(&packet_switch_select::forward_tun_to_socket, this));
 
   return true;
 }
 
-int packet_switch::wait() {
+int packet_switch_select::wait() {
   if (socket_to_tun_worker_ && socket_to_tun_worker_->joinable())
     socket_to_tun_worker_->join();
 
@@ -58,7 +59,7 @@ int packet_switch::wait() {
   return 0;
 }
 
-void packet_switch::stop() {
+void packet_switch_select::stop() {
   logi() << "send wake up signal...";
   uint64_t n = 1;
   if (write(wakeup_udp_fd_, &n, sizeof(uint64_t)) <= 0) {
@@ -69,7 +70,7 @@ void packet_switch::stop() {
   }
 }
 
-void packet_switch::forward_data(int in_fd, int out_fd, int wakeup_fd) {
+void packet_switch_select::forward_data(int in_fd, int out_fd, int wakeup_fd) {
 // currently the linux kernel build-in tun driver doesn't support
 // splice operation, so we cannot leverage the zero copy technology
 // for better performance to redirect the data, refer to :
@@ -83,19 +84,7 @@ void packet_switch::forward_data(int in_fd, int out_fd, int wakeup_fd) {
   int rc = pipe(fd_pipe);
 
   while (true) {
-    // move data from in fd to pipe
-    rc = splice(in_fd, nullptr, fd_pipe[1], nullptr, 4096, SPLICE_F_MOVE | SPLICE_F_MOVE);
-    if (rc <= 0) {
-      loge() << "failed to move data from in fd to pipe:" << strerror(errno);
-      break;
-    }
-
-    // move data from pipe to out fd
-    rc = splice(fd_pipe[0], nullptr, out_fd, nullptr, rc, SPLICE_F_MOVE | SPLICE_F_MOVE);
-    if (rc <= 0) {
-      loge() << "failed to move data to pipe to out fd" << strerror(errno);
-      break;
-    }
+    forward_with_splice(in_fd, out_fd, fd_pipe);
   }
 
   // close pipe
@@ -135,39 +124,19 @@ void packet_switch::forward_data(int in_fd, int out_fd, int wakeup_fd) {
     }
 
     if (FD_ISSET(in_fd, &read_fds)) {
-      // read data
-      rlen = ::read(in_fd, buf.data(), buf.size());
-      if (rlen <= 0) {
-        loge() << "failed to read data from in fd:" << strerror(errno);
-        return;
-      }
-
-      logv() << "<<<< read " << rlen << " bytes from in fd";
-
-      // write all source data to destination
-      left = rlen;
-      while (left) {
-        wlen = ::write(out_fd, buf.data(), left);
-        if (wlen <= 0) {
-          loge() << "failed to write data to out fd:" << strerror(errno);
-          return;
-        }
-        logv() << ">>>> write " << wlen << " bytes to out fd";
-
-        left -= wlen;
-      }
+      forward_with_rw(in_fd, out_fd);
     }
   }
 #endif
 }
 
-void packet_switch::forward_tun_to_socket() {
+void packet_switch_select::forward_tun_to_socket() {
   logi() << "tun -> socket worker is running...";
   forward_data(fd_tun_, fd_socket_, wakeup_tun_fd_);
   logi() << "tun -> socket worker is exiting...";
 }
 
-void packet_switch::forward_socket_to_tun() {
+void packet_switch_select::forward_socket_to_tun() {
   logi() << "socket -> tun worker is running...";
   forward_data(fd_socket_, fd_tun_, wakeup_udp_fd_);
   logi() << "socket -> tun worker is exiting...";

@@ -17,7 +17,7 @@ int application::run(const std::string& tun_ip, const std::string& remote_ip,
     return -1;
   }
 
-  if (!udp_socket_.bind("0.0.0.0", 8888)) {
+  if (!udp_socket_.bind("0.0.0.0", 8000)) {
     loge() << "failed to bind connection socket to local address";
     return -1;
   }
