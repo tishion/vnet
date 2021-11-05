@@ -28,8 +28,8 @@ static void set_signal(int signo, void (*handler)(int)) {
 }
 
 static void usage(const char* program) {
-  logi() << "Usage:" << program << " tun-ip remote-ip remote-port";
-  logi() << "Example:" << program << " 172.16.0.1  10.10.10.10 7000";
+  logi() << "Usage:" << program << " vn-port tun-ip remote-ip";
+  logi() << "Example:" << program << "8888 192.168.12.34 10.10.10.10";
 }
 
 int main(int argc, char** argv) {
@@ -39,9 +39,9 @@ int main(int argc, char** argv) {
   }
 
   // extract args
-  std::string tun_ip = argv[1];
-  std::string remote_ip = argv[2];
-  uint16_t remote_port = std::atoi(argv[3]);
+  uint16_t vn_port = std::atoi(argv[1]);
+  std::string tun_ip = argv[2];
+  std::string remote_ip = argv[3];
 
   uint32_t tmp = 0;
 
@@ -62,5 +62,5 @@ int main(int argc, char** argv) {
   set_signal(SIGQUIT, sigexit);
 
   // start the application
-  return app_.run(tun_ip, remote_ip, remote_port);
+  return app_.run(tun_ip, remote_ip, vn_port);
 }

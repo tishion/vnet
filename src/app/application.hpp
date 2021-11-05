@@ -16,7 +16,7 @@ public:
   application();
   ~application();
 
-  int run(const std::string& tun_ip, const std::string& remote_ip, uint16_t remote_port);
+  int run(const std::string& tun_ip, const std::string& remote_ip, uint16_t vn_port);
 
   void stop();
 

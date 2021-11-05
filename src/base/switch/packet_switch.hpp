@@ -26,7 +26,7 @@ public:
   void stop();
 
 private:
-  packet_switch_select switch_;
+  packet_switch_epoll switch_;
 };
 } // namespace vnet
 

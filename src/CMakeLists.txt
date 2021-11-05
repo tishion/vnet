@@ -11,10 +11,10 @@ source_group(
     FILES ${SRC_vnet}
 )
 
-project(vnet-agent)
+project(vn-agent)
 
 file(GLOB_RECURSE SRC_vnet_agent
-    app/vnet-agent/*
+    app/*
 )
 source_group(app
     FILES ${SRC_vnet_agent}

@@ -10,19 +10,18 @@ application::application() {
 application::~application() {
 }
 
-int application::run(const std::string& tun_ip, const std::string& remote_ip,
-                     uint16_t remote_port) {
+int application::run(const std::string& tun_ip, const std::string& remote_ip, uint16_t vn_port) {
   if (!udp_socket_.open()) {
     loge() << "failed to create socket for lower connection";
     return -1;
   }
 
-  if (!udp_socket_.bind("0.0.0.0", 8000)) {
+  if (!udp_socket_.bind("0.0.0.0", vn_port)) {
     loge() << "failed to bind connection socket to local address";
     return -1;
   }
 
-  if (!udp_socket_.connect(remote_ip, remote_port)) {
+  if (!udp_socket_.connect(remote_ip, vn_port)) {
     loge() << "failed to connect to remote peer";
     return -1;
   }

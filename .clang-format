@@ -7,7 +7,6 @@ Language: Cpp
 DerivePointerAlignment: false
 PointerAlignment: Left
 BreakBeforeBraces: Attach
-AllowShortEnumsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: false
 BreakConstructorInitializers: BeforeComma
 BreakInheritanceList: BeforeComma
