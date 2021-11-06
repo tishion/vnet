@@ -29,7 +29,7 @@ static void set_signal(int signo, void (*handler)(int)) {
 
 static void usage(const char* program) {
   logi() << "Usage:" << program << " vn-port tun-ip remote-ip";
-  logi() << "Example:" << program << "8888 192.168.12.34 10.10.10.10";
+  logi() << "Example:" << program << " 8888 192.168.12.34 10.10.10.10";
 }
 
 int main(int argc, char** argv) {
@@ -47,13 +47,13 @@ int main(int argc, char** argv) {
 
   // validatet tun ip address
   if (0 >= inet_pton(AF_INET, tun_ip.c_str(), &tmp)) {
-    logi() << "invalid IP address:" << tun_ip;
+    loge() << "invalid IP address:" << tun_ip;
     exit(EXIT_FAILURE);
   }
 
   // validate remote ip address
   if (0 >= inet_pton(AF_INET, remote_ip.c_str(), &tmp)) {
-    logi() << "invalid IP address:" << remote_ip;
+    loge() << "invalid IP address:" << remote_ip;
     exit(EXIT_FAILURE);
   }
 

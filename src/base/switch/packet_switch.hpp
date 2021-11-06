@@ -26,7 +26,11 @@ public:
   void stop();
 
 private:
+#if defined(SOCKET_EPOLL)
   packet_switch_epoll switch_;
+#else
+  packet_switch_select switch_;
+#endif
 };
 } // namespace vnet
 

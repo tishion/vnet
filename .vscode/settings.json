@@ -68,5 +68,8 @@
     "*.ipp": "cpp"
   },
   "cmake.buildDirectory": "${workspaceFolder}/build/linux",
-  "C_Cpp.default.includePath": ["${workspaceFolder}/src"]
+  "C_Cpp.default.includePath": [
+    "${workspaceFolder}/src"
+  ],
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
 }
