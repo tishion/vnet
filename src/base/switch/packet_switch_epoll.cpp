@@ -83,8 +83,6 @@ void packet_switch_epoll::process() {
     bool ok = evt_.wait(events, 2, -1);
     if (!ok) {
       logw() << "faild to wait";
-    } else {
-      logi() << "wait ok...., event size:" << events.size();
     }
 
     for (auto e : events) {
