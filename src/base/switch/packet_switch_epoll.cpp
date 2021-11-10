@@ -80,9 +80,11 @@ void packet_switch_epoll::process() {
 
   evtio::evt_event_list events;
   while (!exit_) {
-    bool ok = evt_.wait(events, 2, 0);
+    bool ok = evt_.wait(events, 2, -1);
     if (!ok) {
       logw() << "faild to wait";
+    } else {
+      logi() << "wait ok...., event size:" << events.size();
     }
 
     for (auto e : events) {
