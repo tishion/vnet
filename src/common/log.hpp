@@ -7,8 +7,7 @@
 
 namespace common {
 
-enum logging_level
-{
+enum logging_level {
   LS_UNKNOWN,
   LS_VERBOSE,
   LS_DEBUG,
@@ -42,14 +41,21 @@ public:
   logger();
   ~logger();
 
-  void operator&=(message& msg);
+  logging_level min_level() {
+    return min_level_;
+  };
+
+  logging_level operator&=(message& msg);
 
 private:
-  logging_level level_;
+  logging_level min_level_;
 };
 } // namespace common
 
-#define log(level) common::logger::default_instance() &= common::logger::message(level)
+#define log(level)                                                                                 \
+  common::logger::default_instance().min_level() > level                                           \
+      ? common::LS_UNKNOWN                                                                         \
+      : common::logger::default_instance() &= common::logger::message(level)
 
 #define logv() log(common::LS_VERBOSE)
 #define logd() log(common::LS_DEBUG)

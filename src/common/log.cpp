@@ -101,15 +101,14 @@ logger& logger::default_instance() {
 }
 
 logger::logger()
-    : level_(LS_VERBOSE) {
+    : min_level_(LS_INFO) {
 }
 
 logger::~logger() {
 }
 
-void logger::operator&=(message& msg) {
-  if (msg.level_ >= this->level_) {
-    std::cout << msg.oss_.str() << std::endl;
-  }
+logging_level logger::operator&=(message& msg) {
+  std::cout << msg.oss_.str() << std::endl;
+  return msg.level_;
 }
 } // namespace common

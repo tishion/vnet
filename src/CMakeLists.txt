@@ -15,6 +15,10 @@ source_group(
 
 link_libraries(pthread)
 
+if (ENABLE_GPERF)
+    link_libraries(profiler)
+endif()
+
 #####################################################
 # create vn-agent-select target
 project(vn-agent-select)

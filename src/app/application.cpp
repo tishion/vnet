@@ -1,5 +1,7 @@
 #include "application.hpp"
 
+#include <gperftools/profiler.h>
+
 #include "common/log.hpp"
 
 namespace vnet {
@@ -36,9 +38,11 @@ int application::run(const std::string& tun_ip, const std::string& remote_ip, ui
     return -1;
   }
 
+  ProfilerStart("vn-agent.prof");
   // start packet switch
   packet_switch_.start(tun_iface_.fd(), udp_socket_.fd());
   int rc = packet_switch_.wait();
+  ProfilerStop();
 
   // close tun device
   tun_iface_.close();
