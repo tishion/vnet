@@ -56,7 +56,7 @@ void packet_switch_epoll::stop() {
 }
 
 void packet_switch_epoll::process() {
-  logi() << "+++++ proces worker is running...";
+  logi() << "+++++ process worker is running...";
 
   if (!evt_.open()) {
     loge() << "failed to open evtio";
@@ -98,6 +98,6 @@ void packet_switch_epoll::process() {
 
   evt_.close();
 
-  logi() << "----- proces worker is exiting...";
+  logi() << "----- process worker is exiting...";
 }
 } // namespace vnet
