@@ -10,14 +10,14 @@
 
 #include "log.hpp"
 
-int forward_with_rw(int in_fd, int out_fd) {
+int forward_with_rw(std::vector<uint8_t>& buf, int in_fd, int out_fd) {
   // paratmers
   int rlen = 0;
   int wlen = 0;
   int left = 0;
+  int offset = 0;
 
   // read data from source
-  std::vector<uint8_t> buf(4096);
   rlen = ::read(in_fd, buf.data(), buf.size());
   if (rlen <= 0) {
     loge() << "failed to read data from in fd:" << strerror(errno);
@@ -28,14 +28,16 @@ int forward_with_rw(int in_fd, int out_fd) {
 
   // write all source data to destination
   left = rlen;
+  offset = 0;
   while (left) {
-    wlen = ::write(out_fd, buf.data(), left);
+    wlen = ::write(out_fd, buf.data() + offset, left);
     if (wlen <= 0) {
       loge() << "failed to write data to out fd:" << strerror(errno);
       return (rlen - left);
     }
     logv() << ">>>> write " << wlen << " bytes to out fd";
 
+    offset += wlen;
     left -= wlen;
   }
 

@@ -78,6 +78,7 @@ void packet_switch_epoll::process() {
 
   exit_ = false;
 
+  std::vector<uint8_t> buf(32 * 1024);
   evtio::evt_event_list events;
   while (!exit_) {
     bool ok = evt_.wait(events, 2, -1);
@@ -87,9 +88,9 @@ void packet_switch_epoll::process() {
 
     for (auto e : events) {
       if (e.context->handle == fd_tun_) {
-        forward_with_rw(fd_tun_, fd_socket_);
+        forward_with_rw(buf, fd_tun_, fd_socket_);
       } else if (e.context->handle == fd_socket_) {
-        forward_with_rw(fd_socket_, fd_tun_);
+        forward_with_rw(buf, fd_socket_, fd_tun_);
       } else {
         loge() << "unknown event";
       }
