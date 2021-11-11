@@ -10,7 +10,7 @@
 
 #include "log.hpp"
 
-int forward_with_rw(std::vector<uint8_t>& buf, int in_fd, int out_fd) {
+int forward_with_rw(uint8_t* buf, int size, int in_fd, int out_fd) {
   // paratmers
   int rlen = 0;
   int wlen = 0;
@@ -18,7 +18,7 @@ int forward_with_rw(std::vector<uint8_t>& buf, int in_fd, int out_fd) {
   int offset = 0;
 
   // read data from source
-  rlen = ::read(in_fd, buf.data(), buf.size());
+  rlen = ::read(in_fd, buf, size);
   if (rlen <= 0) {
     loge() << "failed to read data from in fd:" << strerror(errno);
     return -1;
@@ -30,7 +30,7 @@ int forward_with_rw(std::vector<uint8_t>& buf, int in_fd, int out_fd) {
   left = rlen;
   offset = 0;
   while (left) {
-    wlen = ::write(out_fd, buf.data() + offset, left);
+    wlen = ::write(out_fd, buf + offset, left);
     if (wlen <= 0) {
       loge() << "failed to write data to out fd:" << strerror(errno);
       return (rlen - left);

@@ -9,7 +9,7 @@
 #include <sys/eventfd.h>
 #include <sys/select.h>
 
-#include <vector>
+#include <array>
 
 #include "common/log.hpp"
 #include "common/utils.h"
@@ -98,7 +98,7 @@ void packet_switch_select::forward_data(int in_fd, int out_fd, int wakeup_fd) {
   int ret = 0;
 
   // buf
-  std::vector<uint8_t> buf(32 * 1024);
+  std::array<uint8_t, 16 * 1024> buf;
   while (true) {
     // prepare fd set
     fd_set read_fds;
@@ -124,7 +124,7 @@ void packet_switch_select::forward_data(int in_fd, int out_fd, int wakeup_fd) {
     }
 
     if (FD_ISSET(in_fd, &read_fds)) {
-      forward_with_rw(buf, in_fd, out_fd);
+      forward_with_rw(buf.data(), buf.size(), in_fd, out_fd);
     }
   }
 #endif
