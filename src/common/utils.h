@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-int forward_with_rw(uint8_t* buf, int size, int in_fd, int out_fd);
+int forward_with_readwrite(uint8_t* buf, int size, int in_fd, int out_fd);
 
 int forward_with_splice(int in_fd, int out_fd, int pipe[2]);
 

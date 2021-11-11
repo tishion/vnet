@@ -1,47 +1,55 @@
 #include "utils.h"
 
 #include <cstdint>
-#include <vector>
 
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
 
+#include <sys/socket.h>
+
 #include "log.hpp"
 
-int forward_with_rw(uint8_t* buf, int size, int in_fd, int out_fd) {
+int forward_with_readwrite(uint8_t* buf, int size, int in_fd, int out_fd) {
+  int transferred = 0;
+
   // paratmers
   int rlen = 0;
-  int wlen = 0;
-  int left = 0;
-  int offset = 0;
-
-  // read data from source
-  rlen = ::read(in_fd, buf, size);
-  if (rlen <= 0) {
-    loge() << "failed to read data from in fd:" << strerror(errno);
-    return -1;
-  }
-
-  logv() << "<<<< read " << rlen << " bytes from in fd";
-
-  // write all source data to destination
-  left = rlen;
-  offset = 0;
-  while (left) {
-    wlen = ::write(out_fd, buf + offset, left);
-    if (wlen <= 0) {
-      loge() << "failed to write data to out fd:" << strerror(errno);
-      return (rlen - left);
+  while (true) {
+    rlen = ::read(in_fd, buf, size);
+    if (rlen <= 0) {
+      if (errno != EAGAIN) {
+        loge() << "failed to read data from in fd" << strerror(errno);
+      }
+      break;
     }
-    logv() << ">>>> write " << wlen << " bytes to out fd";
 
-    offset += wlen;
-    left -= wlen;
+    logv() << "<<<< read " << rlen << " bytes from in fd";
+
+    // write all source data to destination
+    int offset = 0;
+    int wlen = 0;
+    int left = rlen;
+    while (left) {
+      wlen = ::write(out_fd, buf + offset, left);
+      if (wlen <= 0 && errno != EAGAIN) {
+        if (errno == EAGAIN) {
+          continue;
+        } else {
+          loge() << "failed to write data to out fd:" << strerror(errno);
+          return transferred;
+        }
+      }
+      logv() << ">>>> write " << wlen << " bytes to out fd";
+
+      left -= wlen;
+      offset += wlen;
+      transferred += wlen;
+    }
   }
 
-  return wlen;
+  return transferred;
 }
 
 int forward_with_splice(int in_fd, int out_fd, int pipe[2]) {

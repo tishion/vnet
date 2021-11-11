@@ -41,6 +41,15 @@ public:
   bool open();
 
   /**
+   * @brief Sets the nonblock object
+   *
+   * @param nonblock
+   * @return true
+   * @return false
+   */
+  bool set_nonblock(bool nonblock);
+
+  /**
    * @brief Set the net addr object
    *
    * @param addr

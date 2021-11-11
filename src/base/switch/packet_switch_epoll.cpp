@@ -90,9 +90,9 @@ void packet_switch_epoll::process() {
 
     for (auto e : events) {
       if (e.context->handle == fd_tun_) {
-        forward_with_rw(buf.data(), buf.size(), fd_tun_, fd_socket_);
+        forward_with_readwrite(buf.data(), buf.size(), fd_tun_, fd_socket_);
       } else if (e.context->handle == fd_socket_) {
-        forward_with_rw(buf.data(), buf.size(), fd_socket_, fd_tun_);
+        forward_with_readwrite(buf.data(), buf.size(), fd_socket_, fd_tun_);
       } else {
         loge() << "unknown event";
       }

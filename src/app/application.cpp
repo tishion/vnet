@@ -18,6 +18,11 @@ int application::run(const std::string& tun_ip, const std::string& remote_ip, ui
     return -1;
   }
 
+  if (!udp_socket_.set_nonblock(true)) {
+    loge() << "failed to set socket to non-blocking mode";
+    return -1;
+  }
+
   if (!udp_socket_.bind("0.0.0.0", vn_port)) {
     loge() << "failed to bind connection socket to local address";
     return -1;
@@ -30,6 +35,11 @@ int application::run(const std::string& tun_ip, const std::string& remote_ip, ui
 
   if (!tun_iface_.open()) {
     loge() << "failed to open tun device";
+    return -1;
+  }
+
+  if (!tun_iface_.set_nonblock(true)) {
+    loge() << "failed to set tun fd to non-blocking mode";
     return -1;
   }
 

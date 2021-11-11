@@ -1,6 +1,7 @@
 #include "udp_socket.hpp"
 
 #include <errno.h>
+#include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -37,6 +38,26 @@ bool udp_socket::open() {
 
   // keep socket fd
   sock_fd_ = sock;
+  return true;
+}
+
+bool udp_socket::set_nonblock(bool nonblock) {
+  int flags = ::fcntl(sock_fd_, F_GETFL, 0);
+  if (flags < 0) {
+    logw() << "failed to get the original flags:" << strerror(errno);
+  }
+
+  if (nonblock) {
+    flags |= O_NONBLOCK;
+  } else {
+    flags &= ~O_NONBLOCK;
+  }
+
+  if (::fcntl(sock_fd_, F_SETFL, flags) < 0) {
+    loge() << "failed to change the blocking mode:" << strerror(errno);
+    return false;
+  }
+
   return true;
 }
 

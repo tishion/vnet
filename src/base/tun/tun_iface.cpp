@@ -76,6 +76,26 @@ bool tun_iface::open() {
   return true;
 }
 
+bool tun_iface::set_nonblock(bool nonblock) {
+  int flags = ::fcntl(tun_fd_, F_GETFL, 0);
+  if (flags < 0) {
+    logw() << "failed to get the original flags:" << strerror(errno);
+  }
+
+  if (nonblock) {
+    flags |= O_NONBLOCK;
+  } else {
+    flags &= ~O_NONBLOCK;
+  }
+
+  if (::fcntl(tun_fd_, F_SETFL, flags) < 0) {
+    loge() << "failed to change the blocking mode:" << strerror(errno);
+    return false;
+  }
+
+  return true;
+}
+
 bool tun_iface::config(const std::string& addr, const std::string& mask) {
   // open a socket to help to set ip address for tun device
   int sock = ::socket(AF_INET, SOCK_DGRAM, 0);

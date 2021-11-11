@@ -124,7 +124,7 @@ void packet_switch_select::forward_data(int in_fd, int out_fd, int wakeup_fd) {
     }
 
     if (FD_ISSET(in_fd, &read_fds)) {
-      forward_with_rw(buf.data(), buf.size(), in_fd, out_fd);
+      forward_with_readwrite(buf.data(), buf.size(), in_fd, out_fd);
     }
   }
 #endif
