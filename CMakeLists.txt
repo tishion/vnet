@@ -15,7 +15,7 @@ add_compile_options(
     "-g"
 )
 
-option(ENABLE_GPERF "Enable google profiler" ON)
+option(ENABLE_GPERF "Enable google profiler" OFF)
 
 # set CXX flags
 set(FLEXNET_CXX_FLAGS_LIST

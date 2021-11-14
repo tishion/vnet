@@ -1,6 +1,8 @@
 #include "application.hpp"
 
+#if ENABLE_GPERF
 #include <gperftools/profiler.h>
+#endif
 
 #include "common/log.hpp"
 
@@ -48,11 +50,15 @@ int application::run(const std::string& tun_ip, const std::string& remote_ip, ui
     return -1;
   }
 
+#if ENABLE_GPERF
   ProfilerStart("vn-agent.prof");
+#endif
   // start packet switch
   packet_switch_.start(tun_iface_.fd(), udp_socket_.fd());
   int rc = packet_switch_.wait();
+#if ENABLE_GPERF
   ProfilerStop();
+#endif
 
   // close tun device
   tun_iface_.close();
