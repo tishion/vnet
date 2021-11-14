@@ -23,19 +23,15 @@ public:
   void stop();
 
 protected:
-  void forward_data(int in_fd, int out_fd, int wakeup_fd);
-  void forward_tun_to_socket();
-  void forward_socket_to_tun();
+  void process();
 
 private:
-  int wakeup_tun_fd_;
-  int wakeup_udp_fd_;
-
   int fd_tun_;
   int fd_socket_;
+  int wakeup_fd_;
 
-  std::unique_ptr<std::thread> tun_to_socket_worker_;
-  std::unique_ptr<std::thread> socket_to_tun_worker_;
+  bool exit_ = false;
+  std::unique_ptr<std::thread> worker_thread_;
 };
 } // namespace vnet
 

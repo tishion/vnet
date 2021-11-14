@@ -31,8 +31,8 @@ private:
   int fd_tun_;
   int fd_socket_;
 
-  bool exit_ = false;
   evtio::evt evt_;
+  bool exit_ = false;
   std::unique_ptr<std::thread> worker_thread_;
 };
 } // namespace vnet

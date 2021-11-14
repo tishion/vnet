@@ -16,7 +16,16 @@ source_group(
 link_libraries(pthread)
 
 if (ENABLE_GPERF)
+    add_compile_definitions(
+        ENABLE_GPERF
+    )
     link_libraries(profiler)
+endif()
+
+if (SPLICE_TRANSFER)
+    add_compile_definitions(
+        SPLICE_TRANSFER
+    )
 endif()
 
 #####################################################

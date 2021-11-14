@@ -28,8 +28,8 @@ static void set_signal(int signo, void (*handler)(int)) {
 }
 
 static void usage(const char* program) {
-  logi() << "Usage:" << program << " vn-port tun-ip remote-ip";
-  logi() << "Example:" << program << " 8888 192.168.12.34 10.10.10.10";
+  std::cout << "Usage:" << program << " vn-port tun-ip remote-ip" << std::endl;
+  std::cout << "Example:" << program << " 8888 192.168.12.34 10.10.10.10" << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -37,6 +37,9 @@ int main(int argc, char** argv) {
     usage(argv[0]);
     exit(EXIT_FAILURE);
   }
+
+  // set minimum log level
+  common::logger::default_instance().set_min_level(common::LS_VERBOSE);
 
   // extract args
   uint16_t vn_port = std::atoi(argv[1]);

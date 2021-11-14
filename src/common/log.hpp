@@ -41,6 +41,10 @@ public:
   logger();
   ~logger();
 
+  void set_min_level(logging_level l) {
+    min_level_ = l;
+  };
+
   logging_level min_level() {
     return min_level_;
   };
