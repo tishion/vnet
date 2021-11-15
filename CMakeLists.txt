@@ -16,7 +16,6 @@ add_compile_options(
 )
 
 option(ENABLE_GPERF "Enable google profiler" OFF)
-option(SPLICE_TRANSFER "Transfer data with splice between fds" ON)
 
 # set CXX flags
 set(FLEXNET_CXX_FLAGS_LIST

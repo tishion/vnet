@@ -22,26 +22,43 @@ if (ENABLE_GPERF)
     link_libraries(profiler)
 endif()
 
-if (SPLICE_TRANSFER)
-    add_compile_definitions(
-        SPLICE_TRANSFER
-    )
-endif()
-
 #####################################################
-# create vn-agent-select target
-project(vn-agent-select)
+# create vn-agent-select-rd target
+project(vn-agent-select-rd)
 add_executable(${PROJECT_NAME}
     ${SRC_vnet}
 )
 
 #####################################################
-# create vn-agent-epoll target
-project(vn-agent-epoll)
+# create vn-agent-epoll-rd target
+project(vn-agent-epoll-rd)
 add_executable(${PROJECT_NAME}
     ${SRC_vnet}
 )
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE
         -DSOCKET_EPOLL
+)
+
+#####################################################
+# create vn-agent-select-splice target
+project(vn-agent-select-splice)
+add_executable(${PROJECT_NAME}
+    ${SRC_vnet}
+)
+target_compile_definitions(${PROJECT_NAME}
+    PRIVATE
+        -DSPLICE_TRANSFER
+)
+
+#####################################################
+# create vn-agent-epoll-splice target
+project(vn-agent-epoll-splice)
+add_executable(${PROJECT_NAME}
+    ${SRC_vnet}
+)
+target_compile_definitions(${PROJECT_NAME}
+    PRIVATE
+        -DSOCKET_EPOLL
+        -DSPLICE_TRANSFER
 )
