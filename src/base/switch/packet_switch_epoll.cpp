@@ -106,7 +106,7 @@ void packet_switch_epoll::process() {
     // check result
     for (auto e : events) {
       if (e.context->handle == fd_tun_) {
-        logv() << "tun >>>>>>>>>>>>> socket";
+        logv() << "read tun >>>>>>>>>>>>> write socket";
         in_fd = fd_tun_;
         out_fd = fd_socket_;
 #if defined(SPLICE_TRANSFER)
@@ -115,7 +115,7 @@ void packet_switch_epoll::process() {
         out_flags = SPLICE_F_MOVE;
 #endif
       } else if (e.context->handle == fd_socket_) {
-        logv() << "socket >>>>>>>>>>>>> tun";
+        logv() << "read socket >>>>>>>>>>>>> write tun";
         in_fd = fd_socket_;
         out_fd = fd_tun_;
 #if defined(SPLICE_TRANSFER)

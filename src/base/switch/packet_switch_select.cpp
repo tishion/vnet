@@ -100,15 +100,16 @@ void packet_switch_select::process() {
     // check result
     for (int fd = 0; fd < fd_limit; fd++) {
       if (FD_ISSET(fd, &read_fds)) {
-
         if (fd == fd_tun_) {
+          logv() << "read tun >>>>>>>>>>>>> write socket";
           in_fd = fd_tun_;
           out_fd = fd_socket_;
 #if defined(SPLICE_TRANSFER)
           in_flags = SPLICE_F_MOVE;
-          out_flags = SPLICE_F_MOVE | SPLICE_F_MORE;
+          out_flags = SPLICE_F_MOVE;
 #endif
         } else if (fd == fd_socket_) {
+          logv() << "read socket >>>>>>>>>>>>> write tun";
           in_fd = fd_socket_;
           out_fd = fd_tun_;
 #if defined(SPLICE_TRANSFER)
