@@ -23,15 +23,15 @@ if (ENABLE_GPERF)
 endif()
 
 #####################################################
-# create vn-agent-select-rd target
-project(vn-agent-select-rd)
+# create vn-agent-select-rdwr target
+project(vn-agent-select-rdwr)
 add_executable(${PROJECT_NAME}
     ${SRC_vnet}
 )
 
 #####################################################
-# create vn-agent-epoll-rd target
-project(vn-agent-epoll-rd)
+# create vn-agent-epoll-rdwr target
+project(vn-agent-epoll-rdwr)
 add_executable(${PROJECT_NAME}
     ${SRC_vnet}
 )
