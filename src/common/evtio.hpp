@@ -713,15 +713,11 @@ protected:
 
     // process the result
     for (int i = 0; i < nfd; i++) {
-      // validate the event data
-      if (!evts[i].data.ptr) {
-        continue;
-      }
-
-      // read eventfd to reset its status
+      // if eventfd was signaled read eventfd to reset its status
       if (evts[i].data.ptr == nullptr) {
         uint64_t n;
         ::read(wakeup_fd_, &n, sizeof(uint64_t));
+        continue;
       }
 
       // build event
